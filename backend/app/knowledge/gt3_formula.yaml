@@ -1,0 +1,546 @@
+version: 1
+defaults:
+  max_changes: 3
+  max_changes_wet: 2
+  min_score: 0.35
+
+# Each rule maps a driver symptom to a small set of candidate setup changes.
+# "steps" is measured in the parameter's own UI step (one click / one step),
+# so the same rule works on a GT3 with N/m ARBs and on a formula car with
+# click-based ARBs.
+rules:
+  - id: us_entry_mech
+    name: Subviraje de entrada
+    symptoms: [understeer]
+    phases: [entry]
+    speeds: [any]
+    weight: 1.0
+    changes:
+      - role: front_arb
+        direction: -1
+        steps: 1
+        weight: 1.0
+        category: mechanical
+        risk: medium
+        reason: "Ablandar la barra delantera da más agarre al eje delantero al girar."
+        effect: "Más mordiente en el punto de giro; puede aumentar el balanceo."
+      - role: front_toe
+        direction: 1
+        steps: 5
+        weight: 0.75
+        category: alignment
+        risk: low
+        reason: "Un poco más de convergencia abierta delantera mejora la respuesta inicial."
+        effect: "Entrada más viva; vigilar desgaste y estabilidad en recta."
+      - role: brake_bias
+        direction: -1
+        steps: 1
+        weight: 0.45
+        category: brakes
+        risk: high
+        reason: "Mover el reparto de frenada hacia atrás ayuda a rotar al soltar el freno."
+        effect: "Más rotación en entrada; riesgo de bloqueo trasero si te excedés."
+
+  - id: us_mid_mech
+    name: Subviraje de medio de curva
+    symptoms: [understeer]
+    phases: [mid]
+    speeds: [any]
+    weight: 1.0
+    changes:
+      - role: front_arb
+        direction: -1
+        steps: 1
+        weight: 1.0
+        category: mechanical
+        risk: medium
+        reason: "Menos barra delantera reparte más carga sobre el neumático delantero."
+        effect: "Más rotación sostenida en el apex."
+      - role: rear_arb
+        direction: 1
+        steps: 1
+        weight: 0.9
+        category: mechanical
+        risk: medium
+        reason: "Endurecer la barra trasera quita agarre al eje trasero y equilibra el coche."
+        effect: "Más rotación, a costa de estabilidad y tracción."
+      - role: front_spring
+        direction: -1
+        steps: 1
+        weight: 0.55
+        category: mechanical
+        risk: medium
+        reason: "Un muelle delantero más blando ayuda en curvas de radio constante."
+        effect: "Más grip delantero; puede aumentar el balanceo y el subviraje en transiciones."
+
+  - id: us_exit_power
+    name: Subviraje de salida con gas
+    symptoms: [understeer]
+    phases: [exit]
+    speeds: [any]
+    weight: 1.0
+    changes:
+      - role: diff_power
+        direction: -1
+        steps: 1
+        weight: 1.0
+        category: diff
+        risk: medium
+        reason: "Menos bloqueo del diferencial al acelerar permite que el eje trasero rote."
+        effect: "Menos subviraje de potencia; puede aparecer sobreviraje si abusás del gas."
+      - role: diff_preload
+        direction: -1
+        steps: 1
+        weight: 0.7
+        category: diff
+        risk: medium
+        reason: "Menos precarga reduce el arrastre del diferencial en la salida."
+        effect: "Salida más libre; vigilar tracción y estabilidad en frenada."
+      - role: rear_arb
+        direction: 1
+        steps: 1
+        weight: 0.45
+        category: mechanical
+        risk: medium
+        reason: "Un poco más de barra trasera ayuda a rotar con el gas."
+        effect: "Rotación extra; puede costar tracción."
+
+  - id: us_fast_aero
+    name: Subviraje en curvas rápidas
+    symptoms: [understeer]
+    phases: [mid]
+    speeds: [fast]
+    weight: 1.0
+    changes:
+      - role: front_wing
+        direction: 1
+        steps: 1
+        weight: 1.0
+        category: aero
+        risk: low
+        reason: "Más carga aerodinámica delantera estabiliza el eje delantero a alta velocidad."
+        effect: "Más agarre en curvas rápidas; algo de velocidad punta."
+      - role: rear_wing
+        direction: -1
+        steps: 1
+        weight: 0.7
+        category: aero
+        risk: medium
+        reason: "Quitar algo de ala trasera mueve el balance aerodinámico hacia adelante."
+        effect: "Más rotación a alta velocidad; menos estabilidad trasera."
+
+  - id: us_slow_mech
+    name: Subviraje en curvas lentas
+    symptoms: [understeer]
+    phases: [entry, mid]
+    speeds: [slow]
+    weight: 0.9
+    changes:
+      - role: front_toe
+        direction: 1
+        steps: 5
+        weight: 0.9
+        category: alignment
+        risk: low
+        reason: "La convergencia abierta delantera se nota sobre todo en curvas lentas."
+        effect: "Mejor giro inicial; puede perder estabilidad en recta."
+      - role: front_arb
+        direction: -1
+        steps: 1
+        weight: 0.7
+        category: mechanical
+        risk: medium
+        reason: "Ablandar la barra delantera ayuda a que el morro muerda en curvas de radio corto."
+        effect: "Más agarre delantero; más balanceo."
+
+  - id: over_entry
+    name: Sobreviraje de entrada
+    symptoms: [oversteer]
+    phases: [entry, braking]
+    speeds: [any]
+    weight: 1.0
+    changes:
+      - role: brake_bias
+        direction: 1
+        steps: 1
+        weight: 1.0
+        category: brakes
+        risk: high
+        reason: "Adelantar el reparto de frenada estabiliza el eje trasero al entrar."
+        effect: "Menos rotación y más estabilidad; puede aumentar el bloqueo delantero."
+      - role: rear_arb
+        direction: -1
+        steps: 1
+        weight: 0.8
+        category: mechanical
+        risk: medium
+        reason: "Ablandar la barra trasera da más agarre al eje que se está yendo."
+        effect: "Trasera más plantada; algo de subviraje."
+      - role: rear_toe
+        direction: -1
+        steps: 5
+        weight: 0.7
+        category: alignment
+        risk: low
+        reason: "Más convergencia cerrada atrás estabiliza la entrada y la frenada."
+        effect: "Estabilidad trasera; un poco de resistencia al giro."
+
+  - id: over_mid
+    name: Sobreviraje de medio de curva
+    symptoms: [oversteer]
+    phases: [mid]
+    speeds: [any]
+    weight: 1.0
+    changes:
+      - role: rear_arb
+        direction: -1
+        steps: 1
+        weight: 1.0
+        category: mechanical
+        risk: medium
+        reason: "Menos barra trasera reparte más carga sobre el neumático trasero."
+        effect: "Más agarre trasero sostenido."
+      - role: front_arb
+        direction: 1
+        steps: 1
+        weight: 0.8
+        category: mechanical
+        risk: medium
+        reason: "Endurecer la barra delantera baja el agarre delantero y equilibra el coche."
+        effect: "Menos rotación; puede aparecer subviraje."
+      - role: rear_wing
+        direction: 1
+        steps: 1
+        weight: 0.65
+        category: aero
+        risk: low
+        reason: "Más ala trasera aumenta el agarre aerodinámico del eje trasero."
+        effect: "Estabilidad en curvas medias y rápidas; algo de velocidad punta."
+
+  - id: over_exit
+    name: Sobreviraje de salida
+    symptoms: [oversteer]
+    phases: [exit]
+    speeds: [any]
+    weight: 1.0
+    changes:
+      - role: diff_power
+        direction: -1
+        steps: 1
+        weight: 1.0
+        category: diff
+        risk: medium
+        reason: "Menos bloqueo al acelerar reduce el arrastre que desestabiliza la trasera."
+        effect: "Salida más predecible; puede perder algo de tracción."
+      - role: rear_arb
+        direction: -1
+        steps: 1
+        weight: 0.8
+        category: mechanical
+        risk: medium
+        reason: "Ablandar la barra trasera ayuda a que el eje trasero absorba la carga del gas."
+        effect: "Más tracción y estabilidad; algo de subviraje."
+      - role: rear_wing
+        direction: 1
+        steps: 1
+        weight: 0.7
+        category: aero
+        risk: low
+        reason: "Más ala trasera da apoyo al eje que se descarga con el gas."
+        effect: "Estabilidad en salida; algo de velocidad punta."
+
+  - id: wheelspin_exit
+    name: Falta de tracción a la salida
+    symptoms: [wheelspin]
+    phases: [exit]
+    speeds: [slow, medium, any]
+    weight: 1.0
+    changes:
+      - role: rear_arb
+        direction: -1
+        steps: 1
+        weight: 1.0
+        category: mechanical
+        risk: medium
+        reason: "Ablandar la barra trasera permite que las dos ruedas sigan mejor el asfalto."
+        effect: "Más tracción; puede aumentar el subviraje."
+      - role: rear_spring
+        direction: -1
+        steps: 1
+        weight: 0.65
+        category: mechanical
+        risk: medium
+        reason: "Un muelle trasero más blando ayuda a plantar el neumático al acelerar."
+        effect: "Más motricidad; más balanceo."
+      - role: tc
+        direction: 1
+        steps: 1
+        weight: 0.8
+        category: electronics
+        risk: low
+        reason: "Subir un nivel el control de tracción corta antes el exceso de giro."
+        effect: "Salida más segura; puede recortar potencia."
+      - role: rear_wing
+        direction: 1
+        steps: 1
+        weight: 0.5
+        category: aero
+        risk: low
+        reason: "Más carga trasera ayuda a que el neumático tenga más trabajo que hacer."
+        effect: "Más agarre; algo de velocidad punta."
+
+  - id: lockup_front
+    name: Bloqueo de ruedas delanteras
+    symptoms: [lockup_front]
+    phases: [braking, any]
+    speeds: [any]
+    weight: 1.0
+    changes:
+      - role: brake_bias
+        direction: -1
+        steps: 1
+        weight: 1.0
+        category: brakes
+        risk: high
+        reason: "Mover el reparto hacia atrás quita carga de frenada al eje delantero."
+        effect: "Menos bloqueo delantero; vigilar el bloqueo trasero."
+      - role: abs
+        direction: 1
+        steps: 1
+        weight: 0.5
+        category: electronics
+        risk: low
+        reason: "Un nivel más de ABS deja que el sistema gestione mejor la presión."
+        effect: "Frenada más estable; algo de distancia."
+
+  - id: lockup_rear
+    name: Bloqueo de ruedas traseras
+    symptoms: [lockup_rear]
+    phases: [braking, any]
+    speeds: [any]
+    weight: 1.0
+    changes:
+      - role: brake_bias
+        direction: 1
+        steps: 1
+        weight: 1.0
+        category: brakes
+        risk: high
+        reason: "Adelantar el reparto reduce la presión sobre las ruedas traseras."
+        effect: "Menos bloqueo trasero; puede bloquear de adelante."
+
+  - id: braking_instability
+    name: Inestabilidad en frenada
+    symptoms: [braking_instability]
+    phases: [braking, entry]
+    speeds: [any]
+    weight: 0.95
+    changes:
+      - role: brake_bias
+        direction: 1
+        steps: 1
+        weight: 0.9
+        category: brakes
+        risk: high
+        reason: "Más reparto delantero estabiliza la trasera en frenada recta."
+        effect: "Menos rotación al frenar; puede bloquear de adelante."
+      - role: rear_arb
+        direction: -1
+        steps: 1
+        weight: 0.6
+        category: mechanical
+        risk: medium
+        reason: "Ablandar la barra trasera da margen al eje trasero bajo transferencia de carga."
+        effect: "Trasera más estable; algo de subviraje."
+      - role: rear_toe
+        direction: -1
+        steps: 5
+        weight: 0.6
+        category: alignment
+        risk: low
+        reason: "Más convergencia trasera estabiliza la frenada."
+        effect: "Estabilidad; menos agilidad en curvas lentas."
+
+  - id: bottoming
+    name: Tope de suspensión / fondo
+    symptoms: [bottoming]
+    phases: [any]
+    speeds: [any]
+    weight: 1.0
+    changes:
+      - role: front_ride
+        direction: 1
+        steps: 1
+        weight: 0.9
+        category: ride_height
+        risk: low
+        reason: "Subir la altura delantera da recorrido antes de tocar el tope."
+        effect: "Menos golpes; puede perder algo de carga aerodinámica."
+      - role: rear_ride
+        direction: 1
+        steps: 1
+        weight: 0.8
+        category: ride_height
+        risk: low
+        reason: "Subir la altura trasera evita que la suspensión haga tope."
+        effect: "Más recorrido; cambia el rake y el balance aero."
+      - role: front_spring
+        direction: 1
+        steps: 1
+        weight: 0.55
+        category: mechanical
+        risk: medium
+        reason: "Un muelle delantero más firme resiste mejor la compresión."
+        effect: "Menos bottoming; más nervio sobre pianos."
+
+  - id: kerb_instability
+    name: Inestabilidad sobre pianos
+    symptoms: [kerb]
+    phases: [any]
+    speeds: [slow, medium, any]
+    weight: 1.0
+    changes:
+      - role: front_fast_bump
+        direction: -1
+        steps: 1
+        weight: 0.8
+        category: dampers
+        risk: low
+        reason: "Ablandar el bump rápido delantero absorbe mejor el escalón del piano."
+        effect: "Más estabilidad sobre pianos; puede perder precisión."
+      - role: rear_fast_bump
+        direction: -1
+        steps: 1
+        weight: 0.75
+        category: dampers
+        risk: low
+        reason: "El bump rápido trasero más blando evita que el eje trasero rebote."
+        effect: "Trasera más estable; puede aumentar el balanceo."
+      - role: front_fast_rebound
+        direction: -1
+        steps: 1
+        weight: 0.6
+        category: dampers
+        risk: low
+        reason: "Menos rebound rápido deja que la rueda vuelva a copiar el suelo antes."
+        effect: "Mejor contacto; vigilar el rebote en curvas."
+      - role: front_ride
+        direction: 1
+        steps: 1
+        weight: 0.45
+        category: ride_height
+        risk: low
+        reason: "Un poco más de altura da margen para absorber el piano."
+        effect: "Menos golpes; menos carga aerodinámica."
+
+  - id: tyre_inner_hot_front
+    name: Goma delantera caliente por dentro
+    symptoms: [tyre_inner_hot_front]
+    phases: [any]
+    speeds: [any]
+    weight: 1.0
+    changes:
+      - role: front_camber
+        direction: 1
+        steps: 1
+        weight: 0.9
+        category: alignment
+        risk: low
+        reason: "Menos camber negativo reparte mejor la temperatura hacia el centro."
+        effect: "Temperatura más uniforme; algo menos de grip en curva."
+      - role: front_pressure
+        direction: -1
+        steps: 1
+        weight: 0.35
+        category: tyres
+        risk: low
+        reason: "Bajar un poco la presión reduce el calor en el hombro interior."
+        effect: "Más contacto; vigilar que no se caiga la presión en caliente."
+
+  - id: tyre_inner_hot_rear
+    name: Goma trasera caliente por dentro
+    symptoms: [tyre_inner_hot_rear]
+    phases: [any]
+    speeds: [any]
+    weight: 1.0
+    changes:
+      - role: rear_camber
+        direction: 1
+        steps: 1
+        weight: 0.9
+        category: alignment
+        risk: low
+        reason: "Menos camber negativo atrás equilibra la temperatura del neumático."
+        effect: "Temperatura más uniforme; algo menos de grip lateral."
+
+  - id: tyre_outer_hot_front
+    name: Goma delantera caliente por fuera
+    symptoms: [tyre_outer_hot_front]
+    phases: [any]
+    speeds: [any]
+    weight: 1.0
+    changes:
+      - role: front_camber
+        direction: -1
+        steps: 1
+        weight: 0.9
+        category: alignment
+        risk: low
+        reason: "Más camber negativo inclina la rueda y reparte el apoyo hacia el interior."
+        effect: "Más grip en curva; vigilar frenada y recta."
+
+  - id: tyre_outer_hot_rear
+    name: Goma trasera caliente por fuera
+    symptoms: [tyre_outer_hot_rear]
+    phases: [any]
+    speeds: [any]
+    weight: 1.0
+    changes:
+      - role: rear_camber
+        direction: -1
+        steps: 1
+        weight: 0.9
+        category: alignment
+        risk: low
+        reason: "Más camber negativo atrás reparte mejor el apoyo lateral."
+        effect: "Más grip lateral; menos tracción en recta."
+
+  - id: tyre_center_hot
+    name: Goma caliente en el centro
+    symptoms: [tyre_center_hot]
+    phases: [any]
+    speeds: [any]
+    weight: 1.0
+    changes:
+      - role: front_pressure
+        direction: -1
+        steps: 1
+        weight: 0.7
+        category: tyres
+        risk: low
+        reason: "El centro caliente suele indicar presión excesiva en caliente."
+        effect: "Huella más plana; menos temperatura central."
+      - role: rear_pressure
+        direction: -1
+        steps: 1
+        weight: 0.7
+        category: tyres
+        risk: low
+        reason: "Bajar la presión trasera reduce el apoyo en el centro de la banda."
+        effect: "Más contacto; vigilar estabilidad."
+
+  - id: top_speed
+    name: Falta de velocidad punta
+    symptoms: [top_speed]
+    phases: [straight, any]
+    speeds: [fast, any]
+    weight: 0.9
+    changes:
+      - role: rear_wing
+        direction: -1
+        steps: 1
+        weight: 1.0
+        category: aero
+        risk: medium
+        reason: "Menos ala reduce la resistencia aerodinámica en recta."
+        effect: "Más velocidad punta; menos estabilidad en curvas rápidas."
